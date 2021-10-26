@@ -2,7 +2,7 @@ fetch('http://localhost:3000/api/products')
 
 
   .then(function (response) {
-      //console.log(data.json());
+      //console.log(response.json());
       return response.json();
     })
   .catch(function (error) {
@@ -18,7 +18,7 @@ fetch('http://localhost:3000/api/products')
         lien.setAttribute("href", "./product.html?id="+item._id);
         document.getElementById('items').appendChild(lien);
 
-        let article = document.createElement("ARTICLE") ;
+        let article = document.createElement("ARTICLE");
         lien.appendChild(article);
         
         article.innerHTML =       '<img src="' + item.imageUrl
