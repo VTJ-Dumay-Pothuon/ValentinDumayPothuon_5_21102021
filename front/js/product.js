@@ -71,9 +71,9 @@ function addToCart () {
   // Get set quantity value as an integer
   let quantity = document.getElementById('quantity').value;
   
-  // Safety check if the quantity is under 1
-  if (quantity < 1) {
-    alert("La quantité doit être supérieure à zéro !");return;}
+  // Safety check if the quantity is between 1 and 100
+  if (quantity < 1 || quantity > 100) {
+    alert("La quantité doit être comprise entre 1 et 100 !");return;}
   // console.log("Added item quantity: "+quantity);
 
 
