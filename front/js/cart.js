@@ -1,12 +1,20 @@
 // Total quantity and total price of the cart are set as global variables
 let totalQuantity = 0;
    let totalPrice = 0;
+
 // Once these variable are set in the async fetch, they are displayed
 function updateTotal (inCart, item) {
   totalQuantity += parseInt(inCart.quantity);
      totalPrice += parseInt(inCart.quantity) * parseInt(item.price);
   document.getElementById('totalQuantity').innerText = totalQuantity;
      document.getElementById('totalPrice').innerText = totalPrice;
+}
+
+// Whether it's incremented, decremented or the article is deleted,
+// the article's quantity must be first substracted from the total
+function removeFromTotal (inCart, item) {
+  totalQuantity -= parseInt(inCart.quantity);
+     totalPrice -= parseInt(inCart.quantity) * parseInt(item.price);
 }
 
 // Each article entry added to the cart is displayed thanks to this massive chunk of html
@@ -77,8 +85,7 @@ fetch('http://localhost:3000/api/products')
             checkQuantity.addEventListener('change', function() {
               // console.log(article);
               // First, temporarily remove the updated article from total
-              totalQuantity -= parseInt(inCart.quantity);
-                 totalPrice -= parseInt(inCart.quantity) * parseInt(item.price);
+              removeFromTotal(inCart, item);
 
               // Second, update the quantity set in local storage
               inCart.quantity = checkQuantity.value;
@@ -87,8 +94,23 @@ fetch('http://localhost:3000/api/products')
               // console.log("— "+inCart.quantity+" "+item.name+" "+inCart.color);
 
               // Third, re-add it to total, with the new quantity
-              updateTotal(inCart, item) ;
+              updateTotal(inCart, item);
             });
+
+
+            // Add an event listener to the deleted button so that articles can be deleted
+            let deleteArticle = article.children[1].children[1].children[1].children[0];
+            deleteArticle.addEventListener('click', function() {
+              removeFromTotal(inCart, item);
+              inCart.quantity = "0";
+              cart.splice(cart.indexOf(inCart), 1);
+              localStorage.setItem('cart', JSON.stringify(cart));
+              article.remove();
+              updateTotal(inCart, item);
+            });
+
+
+            // Stop searching the article in the catalogue, as it's already found
             break;
           }
         }
