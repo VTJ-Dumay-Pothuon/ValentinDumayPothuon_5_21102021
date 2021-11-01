@@ -4,8 +4,8 @@ const queryString = window.location.search;
 const id = new URLSearchParams(queryString).get('id');
 // console.log(id);
 
-fetch('http://localhost:3000/api/products')
-
+// Select the article associated with given id
+fetch('http://localhost:3000/api/products/'+id)
 
   .then(function (response) {
    // console.log(response.json());
@@ -16,35 +16,26 @@ fetch('http://localhost:3000/api/products')
     })
 
   
-  // Select the article associated with given id
-  .then(function (data) {
-   // console.log(data);
-      let item = null;
-      for (let article of data) {
-        // console.log(item);
-        if (article._id === id) {
-            item = article;
-            break;
-        }
+  .then(function (item) {
+    // console.log(item);
+
+    try {
+      // Try to input the article's parameters, only if the id is valid
+      document.getElementById('title').innerText       = item.name;
+      document.getElementById('price').innerText       = item.price; 
+      document.getElementById('description').innerText = item.description; 
+      document.getElementsByClassName('item__img')[0].innerHTML = 
+                                          '<img src="' + item.imageUrl
+                                            +'" alt="' + item.altTxt
+                                            +'"></img>';
+
+      // put each available colors into the selection droplist
+      for (let color of item.colors) {
+        let newColor = document.createElement("OPTION");
+        newColor.setAttribute("value", color);
+        newColor.innerText = color;
+        document.getElementById('colors').appendChild(newColor);
       }
-
-      try {
-        // Try to input the article's parameters, only if the id is valid
-        document.getElementById('title').innerText       = item.name;
-        document.getElementById('price').innerText       = item.price; 
-        document.getElementById('description').innerText = item.description; 
-        document.getElementsByClassName('item__img')[0].innerHTML = 
-                                            '<img src="' + item.imageUrl
-                                              +'" alt="' + item.altTxt
-                                              +'"></img>';
-
-        // put each available colors into the selection droplist
-        for (let color of item.colors) {
-          let newColor = document.createElement("OPTION");
-          newColor.setAttribute("value", color);
-          newColor.innerText = color;
-          document.getElementById('colors').appendChild(newColor);
-        }
     } catch (error) {
         console.log(error);
     }
@@ -53,7 +44,7 @@ fetch('http://localhost:3000/api/products')
 
 function addToCart () {
   // Safety check if the id is invalid or the page didn't load well
-  if(document.getElementById('title').innerText==="") {
+  if(document.getElementById('title').innerText==="undefined") {
     alert("Cet article n'existe pas !");return;}
   // console.log("Added item ID: "+id);
   
