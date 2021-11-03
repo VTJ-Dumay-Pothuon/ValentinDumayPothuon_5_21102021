@@ -170,6 +170,20 @@ function sendOrder(cart) {
   })
 } 
 
+// This pseudo-function allows to load a different code whether the page
+// is cart.html or product.html, as the html pages import the same file;
+//-------------------------------------------
+// It doesn't matter if "orderId" passed through the URL is valid or not,
+// as confirmation.html is a read-only user notic. No "hack" is possible
+if (document.URL.indexOf("confirmation.html") >= 0) {
+  // Get the id parameter from URL
+  const queryString = window.location.search;
+  // console.log(queryString);
+  const id = new URLSearchParams(queryString).get('orderId');
+  // console.log(id);
+  document.getElementById('orderId').innerText = id;
+} else {
+
 
 fetch('http://localhost:3000/api/products')
 
@@ -246,3 +260,4 @@ fetch('http://localhost:3000/api/products')
   .catch(function (error) {
     console.log(error);
   });
+}
