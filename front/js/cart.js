@@ -17,6 +17,7 @@ function removeFromTotal (inCart, item) {
      totalPrice -= parseInt(inCart.quantity) * parseInt(item.price);
 }
 
+
 // Each article entry added to the cart is displayed thanks to this massive chunk of html
 // #item is the article entry in the API catalogue, that contains the global settings
 // #order is the article entry in the local storage, that contains the quantity and set color
@@ -42,6 +43,16 @@ function newArticle (item, order) {
                     +'"></div><div class="cart__item__content__settings__delete">'
                     +'<p class="deleteItem">Supprimer</p>'
                     +'</div></div></div>';
+}
+
+
+// Select the article block based on a pair of data parameters,
+// Then, find the quantity dropdown in the standardized structure
+function getQuantity (inCart) {
+  let article = document.querySelectorAll(
+  '[data-id="'+inCart.id+'"][data-color="'+inCart.color+'"]')[0];
+  // console.log(article);
+  return article.children[1].children[1].children[0].children[1];
 }
 
 
@@ -110,6 +121,23 @@ function setOrderButton(cart) {
         alert("Le formulaire est invalide !");
       }
     }
+  });
+}
+
+
+// Add an event listener to the deleted button so that articles can be deleted
+function setDeletionButton (cart, inCart, item) {
+  let article = document.querySelectorAll(
+    '[data-id="'+inCart.id+'"][data-color="'+inCart.color+'"]')[0];
+    // console.log(article);
+  let deleteArticle = article.children[1].children[1].children[1].children[0];
+  deleteArticle.addEventListener('click', function() {
+    removeFromTotal(inCart, item);
+    inCart.quantity = "0";
+    cart.splice(cart.indexOf(inCart), 1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    article.remove();
+    updateTotal(inCart, item);
   });
 }
 
@@ -208,53 +236,42 @@ fetch('http://localhost:3000/api/products')
         if (inCart.id===item._id) {
           // console.log("— "+inCart.quantity+" "+item.name+" "+inCart.color);
           
-          newArticle (item, inCart) ;
-          updateTotal(inCart, item) ;
-
-          // Select the article block based on a pair of data parameters,
-          // Then, find the quantity dropdown in the standardized structure
-          let article = document.querySelectorAll(
-          '[data-id="'+inCart.id+'"][data-color="'+inCart.color+'"]')[0];
-          // console.log(article);
-          let checkQuantity = article.children[1].children[1].children[0].children[1];
-          // console.log(checkQuantity.value);
+          newArticle (item, inCart);
+          updateTotal(inCart, item);
 
           // For each individual article-color pair, an event listener is put onto the quantity
           // On change, it updates the quantity in local storage, and reloads the total values
+          let checkQuantity = getQuantity(inCart);
           checkQuantity.addEventListener('change', function() {
             // console.log(article);
-            // First, temporarily remove the updated article from total
+
+            //## First, temporarily remove the updated article from total ##
             removeFromTotal(inCart, item);
 
-            // Second, update the quantity set in local storage
+            //## Second, update the quantity set in local storage ##
             inCart.quantity = checkQuantity.value;
             localStorage.setItem('cart', JSON.stringify(cart));
             // console.log(cart);
             // console.log("— "+inCart.quantity+" "+item.name+" "+inCart.color);
 
-            // Third, re-add it to total, with the new quantity
+            //## Third, re-add it to total, with the new quantity ##
             updateTotal(inCart, item);
           });
 
+          // Setup deletion button for each article
+          setDeletionButton (cart, inCart, item);
 
-          // Add an event listener to the deleted button so that articles can be deleted
-          let deleteArticle = article.children[1].children[1].children[1].children[0];
-          deleteArticle.addEventListener('click', function() {
-            removeFromTotal(inCart, item);
-            inCart.quantity = "0";
-            cart.splice(cart.indexOf(inCart), 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
-            article.remove();
-            updateTotal(inCart, item);
-          });
-
-
-          // Stop searching the article in the catalogue, as it's already found
+          // Stop searching the article, 
+          // as it's already found
           break;
         }
       }
     }
+    
+    // Setup order form fields' validation
     setFields();
+
+    // Setup order button for the whole cart
     setOrderButton(cart);
   })
   .catch(function (error) {
