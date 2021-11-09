@@ -20,13 +20,13 @@ function removeFromTotal (inCart, item) {
 
 // Each article entry added to the cart is displayed thanks to this massive chunk of html
 // #item is the article entry in the API catalogue, that contains the global settings
-// #order is the article entry in the local storage, that contains the quantity and set color
-function newArticle (item, order) {
+// #ordered is the article entry in the local storage, that contains the quantity and set color
+function newArticle (item, ordered) {
   let cartItems = document.getElementById('cart__items') ;
   let article = document.createElement("ARTICLE");
   article.setAttribute("class", "cart__item");
-  article.setAttribute("data-id", order.id);
-  article.setAttribute("data-color", order.color)
+  article.setAttribute("data-id", ordered.id);
+  article.setAttribute("data-color", ordered.color)
   cartItems.appendChild(article);
 
   article.innerHTML = '<div class="cart__item__img">'
@@ -34,25 +34,22 @@ function newArticle (item, order) {
                     +'" alt="Photographie d’un canapé'+item.altTxt
                     +'"></div><div class="cart__item__content">'
                     +'<div class="cart__item__content__titlePrice">'
-                    +'<h2>'      +item.name+' — '     +order.color
+                    +'<h2>'      +item.name+' — '     +ordered.color
                     +'</h2><p>'  +item.price              ////
                     +' €</p></div><div class="cart__item__content__settings">'
                     +'<div class="cart__item__content__settings__quantity">'
-                    +'<p>Qté : </p><input type="number" class="itemQuantity" name="itemQuantity"'
-                    +' min="1" max="100" value="'     +order.quantity
+                    +'<p>Qté : </p><input id="quantity-'+ordered.id+'" type="number" class="itemQuantity"'
+                    +' name="itemQuantity" min="1" max="100" value="'+ordered.quantity
                     +'"></div><div class="cart__item__content__settings__delete">'
-                    +'<p class="deleteItem">Supprimer</p>'
+                    +'<p class="deleteItem" id="delete-'+ordered.id+'">Supprimer</p>'
                     +'</div></div></div>';
 }
 
 
-// Select the article block based on a pair of data parameters,
-// Then, find the quantity dropdown in the standardized structure
+// Returns the article quantity base on the article id
 function getQuantity (inCart) {
-  let article = document.querySelectorAll(
-  '[data-id="'+inCart.id+'"][data-color="'+inCart.color+'"]')[0];
-  // console.log(article);
-  return article.children[1].children[1].children[0].children[1];
+  // console.log(inCart);
+  return document.getElementById('quantity-'+inCart.id);
 }
 
 
@@ -77,33 +74,37 @@ displayMessage="Un ou plus plusieurs caractères invalides !") {
   }
 }
 
-// Pseudo-object that associates a form field, a RegEx pattern, and a validation boolean
-let fields = [["firstName",namePattern,false],
-               ["lastName",namePattern,false],
-                ["address",addressPattern,false],
-                   ["city",namePattern,false],
-                  ["email",emailPattern,false]];
+// Array of objects that associates a form field, a RegEx pattern, and a validation boolean
+let fields = [{id: "firstName", pattern: namePattern,    valid: false},
+              {id: "lastName",  pattern: namePattern,    valid: false},
+              {id: "address",   pattern: addressPattern, valid: false},
+              {id: "city",      pattern: namePattern,    valid: false},
+              {id: "email",     pattern: emailPattern,   valid: false}];
 
 // Add an event listener to each form field with specific RegEx patterns to check on
 function setFields () {
   for (let field of fields) {
-    document.getElementById(field[0]).addEventListener("input", function(e) {
-      if (field[1].test(e.target.value)) {
-        errorMessage(field[0],false);
-        field[2] = true;
-        // console.log (field[0]+" : "+field[2]);
+    document.getElementById(field.id).addEventListener("input", function(e) {
+      if (field.pattern.test(e.target.value)) {
+        errorMessage(field.id,false);
+        field.valid = true;
+        // console.log (field.id+" : "+field.valid);
       } else {
-        if (field[0]==="email") {
-          errorMessage(field[0],true,"Ceci n'est pas une adresse email valide !");
+        if (field.id==="email") {
+          errorMessage(field.id,true,"Ceci n'est pas une adresse email valide !");
         } else {
-          errorMessage(field[0]);
+          errorMessage(field.id);
         }
-        field[2] = false;
+        field.valid = false;
       }
     });
   }
   // Return true only if ALL fields are valid
-  return fields[0][2] && fields[1][2] && fields[2][2] && fields[3][2] && fields[4][2];
+  let formValidation = fields[0].valid;
+  for (const field of fields) {
+    formValidation = formValidation && field.valid;
+  }
+  return formValidation;
 }
 
 // Check if all fields are valid and the cart isn't empty
@@ -127,10 +128,10 @@ function setOrderButton(cart) {
 
 // Add an event listener to the deleted button so that articles can be deleted
 function setDeletionButton (cart, inCart, item) {
+  // console.log(cart); console.log(inCart); console.log(item);
   let article = document.querySelectorAll(
     '[data-id="'+inCart.id+'"][data-color="'+inCart.color+'"]')[0];
-    // console.log(article);
-  let deleteArticle = article.children[1].children[1].children[1].children[0];
+  let deleteArticle = document.getElementById('delete-'+inCart.id);
   deleteArticle.addEventListener('click', function() {
     removeFromTotal(inCart, item);
     inCart.quantity = "0";
