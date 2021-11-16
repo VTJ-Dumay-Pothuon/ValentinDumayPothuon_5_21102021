@@ -8,6 +8,7 @@ function updateTotal (inCart, item) {
      totalPrice += parseInt(inCart.quantity) * parseInt(item.price);
   document.getElementById('totalQuantity').innerText = totalQuantity;
      document.getElementById('totalPrice').innerText = totalPrice;
+  // console.log (inCart);
 }
 
 // Whether it's incremented, decremented or the article is deleted,
@@ -38,18 +39,18 @@ function newArticle (item, ordered) {
                     +'</h2><p>'  +item.price              ////
                     +' €</p></div><div class="cart__item__content__settings">'
                     +'<div class="cart__item__content__settings__quantity">'
-                    +'<p>Qté : </p><input id="quantity-'+ordered.id+'" type="number" class="itemQuantity"'
+                    +'<p>Qté : </p><input id="quantity-'+ordered.id+'-'+ordered.color+'" type="number" class="itemQuantity"'
                     +' name="itemQuantity" min="1" max="100" value="'+ordered.quantity
                     +'"></div><div class="cart__item__content__settings__delete">'
-                    +'<p class="deleteItem" id="delete-'+ordered.id+'">Supprimer</p>'
+                    +'<p class="deleteItem" id="delete-'+ordered.id+'-'+ordered.color+'">Supprimer</p>'
                     +'</div></div></div>';
 }
 
 
-// Returns the article quantity base on the article id
+// Returns the article quantity base on the article id and color
 function getQuantity (inCart) {
   // console.log(inCart);
-  return document.getElementById('quantity-'+inCart.id);
+  return document.getElementById('quantity-'+inCart.id+'-'+inCart.color);
 }
 
 
@@ -131,7 +132,7 @@ function setDeletionButton (cart, inCart, item) {
   // console.log(cart); console.log(inCart); console.log(item);
   let article = document.querySelectorAll(
     '[data-id="'+inCart.id+'"][data-color="'+inCart.color+'"]')[0];
-  let deleteArticle = document.getElementById('delete-'+inCart.id);
+  let deleteArticle = document.getElementById('delete-'+inCart.id+'-'+inCart.color);
   deleteArticle.addEventListener('click', function() {
     removeFromTotal(inCart, item);
     inCart.quantity = "0";
@@ -244,7 +245,7 @@ fetch('http://localhost:3000/api/products')
           // On change, it updates the quantity in local storage, and reloads the total values
           let checkQuantity = getQuantity(inCart);
           checkQuantity.addEventListener('change', function() {
-            // console.log(article);
+            // console.log(inCart);
 
             //## First, temporarily remove the updated article from total ##
             removeFromTotal(inCart, item);
@@ -275,7 +276,4 @@ fetch('http://localhost:3000/api/products')
     // Setup order button for the whole cart
     setOrderButton(cart);
   })
-  .catch(function (error) {
-    console.log(error);
-  });
 }

@@ -14,7 +14,7 @@ function getColor () {
     alert("La couleur n'est pas définie !");return;}
   // console.log("Added item color: "+color);
 
-  return color
+  return color;
 }
 
 
@@ -78,7 +78,7 @@ function addToCart () {
   
   // Create an empty cart if not already done
   if (localStorage.getItem('cart')===null) {
-    newCart (article) ;
+    newCart (article);
 
   } else {
     // First check if the article is already in the cart ;
